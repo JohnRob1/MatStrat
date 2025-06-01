@@ -14,6 +14,7 @@ import (
 func main() {
 	fmt.Println("running server...")
 	http.HandleFunc("/track-events", TrackEvents)
+	http.HandleFunc("/track-search-profiles", TrackSearchProfiles)
 	http.HandleFunc("/usa-login", UsaLogin)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

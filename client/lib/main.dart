@@ -1,45 +1,29 @@
-import 'package:TrackMini/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_config/flutter_config.dart';
-import 'package:provider/provider.dart';
-import './events.dart';
-import './profile.dart';
+import '../profile/profile-view.dart';
+import '../search/search-view.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await FlutterConfig.loadEnvVariables();
-
-  runApp(
-    MultiProvider(
-      providers: [
-        Provider(
-          create:
-              (context) => ApiService(baseUrl: FlutterConfig.get('BASE_URL')),
-        ),
-        ChangeNotifierProvider(create: (context)),
-      ],
-    ),
-  );
+void main() {
+  runApp(const MatStrat());
 }
 
-class TrackMini extends StatelessWidget {
-  const TrackMini({super.key});
+class MatStrat extends StatelessWidget {
+  const MatStrat({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TrackMini',
+      title: 'MatStrat',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Home(title: 'TrackMini'),
+      home: const Home(title: 'MatStrat Home Page'),
     );
   }
 }
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
-
   final String title;
 
   @override
@@ -50,8 +34,8 @@ class _HomeState extends State<Home> {
   int _selectedIndex = 0;
 
   final List<Widget> _screensList = <Widget>[
-    const EventsScreen(),
-    const ProfileScreen(),
+    const ProfileView(),
+    const SearchView(),
   ];
 
   void _onNavigate(int index) {
@@ -70,8 +54,8 @@ class _HomeState extends State<Home> {
       body: Center(child: _screensList.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,

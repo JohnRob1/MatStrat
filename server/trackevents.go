@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,8 +11,7 @@ import (
 )
 
 const (
-	eventsUrl       = "https://www.trackwrestling.com/Login.jsp"
-	sessionInfoLine = 479
+	trackEventsUrl = "https://www.trackwrestling.com/Login.jsp"
 )
 
 type trackEventType int
@@ -32,11 +30,6 @@ type trackEvent struct {
 	Type trackEventType `json:"type"`
 }
 
-type session struct {
-	Id  string `json:"id"`
-	Tim string `json:"tim"`
-}
-
 func TrackEvents(w http.ResponseWriter, r *http.Request) {
 	tIdxParam := r.URL.Query().Get("tournamentIndex")
 	if tIdxParam == "" {
@@ -46,13 +39,13 @@ func TrackEvents(w http.ResponseWriter, r *http.Request) {
 	tIdx, err := strconv.Atoi(tIdxParam)
 	Assert(err == nil, "error converting tournament index")
 
-	resp, err := http.Get(fmt.Sprintf("%s?tournamentIndex=%d", eventsUrl, tIdx))
-	Assert(err == nil, "error getting events")
+	resp, err := http.Get(fmt.Sprintf("%s?tournamentIndex=%d", trackEventsUrl, tIdx))
+	Assert(err == nil, "error getting track events")
 
 	defer resp.Body.Close()
-	Assert(resp.StatusCode == http.StatusOK, fmt.Sprintf("events responded with status code %d", resp.StatusCode))
+	Assert(resp.StatusCode == http.StatusOK, fmt.Sprintf("track events responded with status code %d", resp.StatusCode))
 
-	sessionData, err := getSessionData(resp)
+	sessionData, err := GetTrackSessionData()
 	Assert(err == nil, "error getting session data")
 
 	sessionDataJson, err := json.Marshal(sessionData)
@@ -76,22 +69,6 @@ func TrackEvents(w http.ResponseWriter, r *http.Request) {
 	for _, event := range eventsListJson {
 		fmt.Fprintln(w, event)
 	}
-}
-
-func getSessionData(resp *http.Response) (session, error) {
-	scanner := bufio.NewScanner(resp.Body)
-
-	for i := 0; i <= sessionInfoLine; i++ {
-		scanner.Scan()
-	}
-
-	re := regexp.MustCompile(`TIM=(\d+)&twSessionId=([^"]+)`)
-	match := re.FindStringSubmatch(scanner.Text())
-
-	return session{
-		Tim: match[1],
-		Id:  match[2],
-	}, nil
 }
 
 func getEventsList(n *html.Node, tIdx int) ([]trackEvent, error) {
